@@ -1,7 +1,7 @@
 'use strict';
-const { 
-  getRandomInt, 
-  shuffle 
+const {
+  getRandomInt,
+  shuffle
 } = require(`../../utils`);
 const fs = require(`fs`);
 
@@ -74,14 +74,15 @@ const generateOffers = (count) => (
     sum: getRandomInt(SumRestrict.MIN, SumRestrict.MAX),
     picture: getPictureFileName(getRandomInt(PictureRestrict.MIN, PictureRestrict.MAX)),
     category: categories.slice(
-      getRandomInt(0, (categories.length - 1) / 2), 
-      getRandomInt((categories.length - 1) / 2, categories.length - 1)
+        getRandomInt(0, (categories.length - 1) / 2),
+        getRandomInt((categories.length - 1) / 2, categories.length - 1)
     ),
   }))
 );
 
 module.exports = {
   name: `--generate`,
+  // eslint-disable-next-line consistent-return
   run(args) {
     const [count] = args;
     const countOffer = Number.parseInt(count, 10) || DEFAULT_COUNT;
@@ -93,8 +94,8 @@ module.exports = {
       if (err) {
         return console.error(`Can't write data to file...`);
       }
-    
-     return console.info(`Operation success. File created.`);
+
+      return console.info(`Operation success. File created.`);
     });
   }
-}
+};

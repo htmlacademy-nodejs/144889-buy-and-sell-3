@@ -1,11 +1,17 @@
 {
-  "name": "buy-and-sell",
+  "name": "144889-buy-and-sell-3",
   "version": "1.0.0",
   "description": "Куплю. Продам",
   "main": "./src/service/service.js",
+  "dependencies": {},
+  "devDependencies": {
+    "eslint": "7.14.0",
+    "eslint-config-htmlacademy": "0.6.0"
+  },
   "scripts": {
     "test": "npm run eslint",
-    "eslint": "eslint --ext .js src/"
+    "eslint": "eslint --ext .js src/",
+    "start": "node ./src/service/service.js"
   },
   "repository": {
     "type": "git",
@@ -16,9 +22,5 @@
   "bugs": {
     "url": "https://github.com/dimalapeto/144889-buy-and-sell-3/issues"
   },
-  "homepage": "https://github.com/dimalapeto/144889-buy-and-sell-3#readme",
-  "devDependencies": {
-    "eslint": "7.18.0",
-    "eslint-config-htmlacademy": "2.0.0"
-  }
+  "homepage": "https://github.com/dimalapeto/144889-buy-and-sell-3#readme"
 }
