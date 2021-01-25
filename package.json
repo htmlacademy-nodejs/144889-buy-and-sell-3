@@ -1,0 +1,24 @@
+{
+  "name": "buy-and-sell",
+  "version": "1.0.0",
+  "description": "Куплю. Продам",
+  "main": "./src/service/service.js",
+  "scripts": {
+    "test": "npm run eslint",
+    "eslint": "eslint --ext .js src/"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/dimalapeto/144889-buy-and-sell-3.git"
+  },
+  "author": "Dima Lapeto",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/dimalapeto/144889-buy-and-sell-3/issues"
+  },
+  "homepage": "https://github.com/dimalapeto/144889-buy-and-sell-3#readme",
+  "devDependencies": {
+    "eslint": "7.18.0",
+    "eslint-config-htmlacademy": "2.0.0"
+  }
+}
