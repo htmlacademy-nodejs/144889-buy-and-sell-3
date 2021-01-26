@@ -5,6 +5,8 @@ const {
 } = require(`../../utils`);
 const fs = require(`fs`);
 
+const {maxOffersGenerate} = require(`../../constants`);
+
 const DEFAULT_COUNT = 1;
 const FILE_NAME = `mocks.json`;
 
@@ -62,7 +64,7 @@ const PictureRestrict = {
   MAX: 16,
 };
 
-const maxOffersGenerate = 1000;
+// const maxOffersGenerate = 1000;
 
 const getPictureFileName = (number) => `item${number.toString().padStart(2, 0)}.jpg`;
 
@@ -82,20 +84,22 @@ const generateOffers = (count) => (
 
 module.exports = {
   name: `--generate`,
-  // eslint-disable-next-line consistent-return
   run(args) {
     const [count] = args;
     const countOffer = Number.parseInt(count, 10) || DEFAULT_COUNT;
     if (countOffer > maxOffersGenerate) {
-      return console.error(`You can generate max 1000 offers!`);
+      console.error(`You can generate max 1000 offers!`);
+      return;
     }
     const content = JSON.stringify(generateOffers(countOffer));
     fs.writeFile(FILE_NAME, content, (err) => {
       if (err) {
-        return console.error(`Can't write data to file...`);
+        console.error(`Can't write data to file...`);
+        return;
       }
 
-      return console.info(`Operation success. File created.`);
+      console.info(`Operation success. File created.`);
+      return;
     });
   }
 };
