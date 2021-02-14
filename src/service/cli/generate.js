@@ -3,7 +3,8 @@ const {
   getRandomInt,
   shuffle
 } = require(`../../utils`);
-const fs = require(`fs`);
+const fs = require(`fs`).promises;
+const chalk = require(`chalk`);
 
 const {maxOffersGenerate} = require(`../../constants`);
 
@@ -64,8 +65,6 @@ const PictureRestrict = {
   MAX: 16,
 };
 
-// const maxOffersGenerate = 1000;
-
 const getPictureFileName = (number) => `item${number.toString().padStart(2, 0)}.jpg`;
 
 const generateOffers = (count) => (
@@ -84,22 +83,19 @@ const generateOffers = (count) => (
 
 module.exports = {
   name: `--generate`,
-  run(args) {
+  async run(args) {
     const [count] = args;
     const countOffer = Number.parseInt(count, 10) || DEFAULT_COUNT;
     if (countOffer > maxOffersGenerate) {
-      console.error(`You can generate max 1000 offers!`);
+      console.error(chalk.red(`You can generate max 1000 offers!`));
       return;
     }
     const content = JSON.stringify(generateOffers(countOffer));
-    fs.writeFile(FILE_NAME, content, (err) => {
-      if (err) {
-        console.error(`Can't write data to file...`);
-        return;
-      }
-
-      console.info(`Operation success. File created.`);
-      return;
-    });
+    try {
+      await fs.writeFile(FILE_NAME, content);
+      console.info(chalk.green(`Operation success. File created.`));
+    } catch (err) {
+      console.error(chalk.red(`Can't write data to file...`));
+    }
   }
 };
