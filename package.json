@@ -3,7 +3,9 @@
   "version": "1.0.0",
   "description": "Куплю. Продам",
   "main": "./src/service/service.js",
-  "dependencies": {},
+  "dependencies": {
+    "chalk": "4.1.0"
+  },
   "devDependencies": {
     "eslint": "7.14.0",
     "eslint-config-htmlacademy": "0.6.0"
