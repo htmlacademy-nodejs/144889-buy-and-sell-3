@@ -43,19 +43,22 @@ const readFile = async (filePath) => {
   }
 };
 
-const generateOffers = (count, titles, categories, sentences) => (
-  Array(count).fill({}).map(() => ({
-    type: Object.keys(OfferType)[Math.floor(Math.random() * Object.keys(OfferType).length)],
-    title: titles[getRandomInt(0, titles.length - 1)],
-    description: shuffle(sentences).slice(1, 5).join(` `),
-    sum: getRandomInt(SumRestrict.MIN, SumRestrict.MAX),
-    picture: getPictureFileName(getRandomInt(PictureRestrict.MIN, PictureRestrict.MAX)),
-    category: categories.slice(
-        getRandomInt(0, (categories.length - 1) / 2),
-        getRandomInt((categories.length - 1) / 2, categories.length - 1)
-    ),
-  }))
-);
+const generateOffers = (count, data) => {
+  const [titles, categories, sentences] = data;
+  return (
+    Array(count).fill({}).map(() => ({
+      type: Object.keys(OfferType)[Math.floor(Math.random() * Object.keys(OfferType).length)],
+      title: titles[getRandomInt(0, titles.length - 1)],
+      description: shuffle(sentences).slice(1, 5).join(` `),
+      sum: getRandomInt(SumRestrict.MIN, SumRestrict.MAX),
+      picture: getPictureFileName(getRandomInt(PictureRestrict.MIN, PictureRestrict.MAX)),
+      category: categories.slice(
+          getRandomInt(0, (categories.length - 1) / 2),
+          getRandomInt((categories.length - 1) / 2, categories.length - 1)
+      ),
+    }))
+  );
+};
 
 module.exports = {
   name: `--generate`,
@@ -63,6 +66,7 @@ module.exports = {
     const sentences = await readFile(FILE_SENTENCES_PATH);
     const titles = await readFile(FILE_TITLES_PATH);
     const categories = await readFile(FILE_CATEGORIES_PATH);
+    const data = await Promise.all([sentences, titles, categories]);
 
     const [count] = args;
     const countOffer = Number.parseInt(count, 10) || DEFAULT_COUNT;
@@ -70,7 +74,7 @@ module.exports = {
       console.error(chalk.red(`You can generate max 1000 offers!`));
       return;
     }
-    const content = JSON.stringify(generateOffers(countOffer, titles, categories, sentences));
+    const content = JSON.stringify(generateOffers(countOffer, data));
     try {
       await fs.writeFile(FILE_NAME, content);
       console.info(chalk.green(`Operation success. File created.`));
