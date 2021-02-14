@@ -44,7 +44,7 @@ const readFile = async (filePath) => {
 };
 
 const generateOffers = (count, data) => {
-  const [titles, categories, sentences] = data;
+  const [sentences, titles, categories] = data;
   return (
     Array(count).fill({}).map(() => ({
       type: Object.keys(OfferType)[Math.floor(Math.random() * Object.keys(OfferType).length)],
