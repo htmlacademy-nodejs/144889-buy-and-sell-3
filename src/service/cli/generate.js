@@ -33,7 +33,7 @@ const PictureRestrict = {
 
 const getPictureFileName = (number) => `item${number.toString().padStart(2, 0)}.jpg`;
 
-const readContent = async (filePath) => {
+const readFile = async (filePath) => {
   try {
     const content = await fs.readFile(filePath, `utf8`);
     return content.split(`\n`);
@@ -60,9 +60,9 @@ const generateOffers = (count, titles, categories, sentences) => (
 module.exports = {
   name: `--generate`,
   async run(args) {
-    const sentences = await readContent(FILE_SENTENCES_PATH);
-    const titles = await readContent(FILE_TITLES_PATH);
-    const categories = await readContent(FILE_CATEGORIES_PATH);
+    const sentences = await readFile(FILE_SENTENCES_PATH);
+    const titles = await readFile(FILE_TITLES_PATH);
+    const categories = await readFile(FILE_CATEGORIES_PATH);
 
     const [count] = args;
     const countOffer = Number.parseInt(count, 10) || DEFAULT_COUNT;
