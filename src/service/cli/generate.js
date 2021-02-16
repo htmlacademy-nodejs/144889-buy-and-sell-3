@@ -43,8 +43,7 @@ const readFile = async (filePath) => {
   }
 };
 
-const generateOffers = (count, data) => {
-  const [sentences, titles, categories] = data;
+const generateOffers = (count, [sentences, titles, categories]) => {
   return (
     Array(count).fill({}).map(() => ({
       type: Object.keys(OfferType)[Math.floor(Math.random() * Object.keys(OfferType).length)],
@@ -63,10 +62,7 @@ const generateOffers = (count, data) => {
 module.exports = {
   name: `--generate`,
   async run(args) {
-    const sentences = await readFile(FILE_SENTENCES_PATH);
-    const titles = await readFile(FILE_TITLES_PATH);
-    const categories = await readFile(FILE_CATEGORIES_PATH);
-    const data = await Promise.all([sentences, titles, categories]);
+    const data = await Promise.all([readFile(FILE_SENTENCES_PATH), readFile(FILE_TITLES_PATH), readFile(FILE_CATEGORIES_PATH)]);
 
     const [count] = args;
     const countOffer = Number.parseInt(count, 10) || DEFAULT_COUNT;
