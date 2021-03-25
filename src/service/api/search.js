@@ -12,14 +12,14 @@ module.exports = (app, searchService) => {
     const {query = ``} = req.query;
 
     if (!query) {
-      res.status(HttpCode.BAD_REQUEST).json([]);
+      res.status(HttpCode.BAD_REQUEST)
+      .send(`Search query should not be empty`);
       return;
     }
 
     const searchResults = await searchService.findAll(query);
-    const searchStatus = searchResults.length > 0 ? HttpCode.OK : HttpCode.NOT_FOUND;
 
-    res.status(searchStatus)
+    res.status(HttpCode.OK)
       .json(searchResults);
   });
 };

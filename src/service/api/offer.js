@@ -2,9 +2,11 @@
 
 const {Router} = require(`express`);
 const {HttpCode} = require(`../../constants`);
-const offerValidator = require(`../middlewares/offerValidator`);
 const offerExist = require(`../middlewares/offerExist`);
-const commentValidator = require(`../middlewares/commentValidator`);
+const instanceValidator = require(`../middlewares/instanceValidator`);
+
+const offerKeys = [`category`, `description`, `picture`, `title`, `type`, `sum`];
+const commentKeys = [`text`];
 
 const route = new Router();
 
@@ -32,7 +34,7 @@ module.exports = (app, offerService, commentService) => {
   });
 
   // POST /api/offers
-  route.post(`/`, offerValidator, (req, res) => {
+  route.post(`/`, instanceValidator(offerKeys), (req, res) => {
     const offer = offerService.create(req.body);
 
     return res.status(HttpCode.CREATED)
@@ -40,7 +42,7 @@ module.exports = (app, offerService, commentService) => {
   });
 
   // PUT /api/offers/:offerId
-  route.put(`/:offerId`, offerValidator, (req, res) => {
+  route.put(`/:offerId`, instanceValidator(offerKeys), (req, res) => {
     const {offerId} = req.params;
     const existOffer = offerService.findOne(offerId);
 
@@ -94,7 +96,7 @@ module.exports = (app, offerService, commentService) => {
   });
 
   // POST /api/offers/:offerId/comments
-  route.post(`/:offerId/comments`, [offerExist(offerService), commentValidator], (req, res) => {
+  route.post(`/:offerId/comments`, [offerExist(offerService), instanceValidator(commentKeys)], (req, res) => {
     const {offer} = res.locals;
     const createdComment = commentService.create(offer, req.body);
 
