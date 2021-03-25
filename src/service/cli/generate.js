@@ -5,8 +5,9 @@ const {
 } = require(`../../utils`);
 const fs = require(`fs`).promises;
 const chalk = require(`chalk`);
+const {nanoid} = require(`nanoid`);
 
-const {maxOffersGenerate} = require(`../../constants`);
+const {maxOffersGenerate, MAX_ID_LENGTH, MAX_COMMENTS} = require(`../../constants`);
 
 const DEFAULT_COUNT = 1;
 const FILE_NAME = `mocks.json`;
@@ -14,6 +15,7 @@ const FILE_NAME = `mocks.json`;
 const FILE_SENTENCES_PATH = `./data/sentences.txt`;
 const FILE_TITLES_PATH = `./data/titles.txt`;
 const FILE_CATEGORIES_PATH = `./data/categories.txt`;
+const FILE_COMMENTS_PATH = `./data/comments.txt`;
 
 const OfferType = {
   OFFER: `offer`,
@@ -43,18 +45,30 @@ const readFile = async (filePath) => {
   }
 };
 
-const generateOffers = (count, [sentences, titles, categories]) => {
+const getRandomArrayPart = (arr) => {
+  return arr.slice(getRandomInt(0, (arr.length - 1) / 2), getRandomInt((arr.length - 1) / 2, arr.length - 1));
+};
+
+const generateComments = (count, comments) => {
   return (
     Array(count).fill({}).map(() => ({
+      id: nanoid(MAX_ID_LENGTH),
+      text: getRandomArrayPart(shuffle(comments)).join(` `),
+    }))
+  );
+};
+
+const generateOffers = (count, [sentences, titles, categories, comments]) => {
+  return (
+    Array(count).fill({}).map(() => ({
+      id: nanoid(MAX_ID_LENGTH),
       type: Object.keys(OfferType)[Math.floor(Math.random() * Object.keys(OfferType).length)],
       title: titles[getRandomInt(0, titles.length - 1)],
       description: shuffle(sentences).slice(1, 5).join(` `),
       sum: getRandomInt(SumRestrict.MIN, SumRestrict.MAX),
       picture: getPictureFileName(getRandomInt(PictureRestrict.MIN, PictureRestrict.MAX)),
-      category: categories.slice(
-          getRandomInt(0, (categories.length - 1) / 2),
-          getRandomInt((categories.length - 1) / 2, categories.length - 1)
-      ),
+      category: getRandomArrayPart(categories),
+      comments: generateComments(getRandomInt(1, MAX_COMMENTS), comments),
     }))
   );
 };
@@ -62,7 +76,7 @@ const generateOffers = (count, [sentences, titles, categories]) => {
 module.exports = {
   name: `--generate`,
   async run(args) {
-    const data = await Promise.all([readFile(FILE_SENTENCES_PATH), readFile(FILE_TITLES_PATH), readFile(FILE_CATEGORIES_PATH)]);
+    const data = await Promise.all([readFile(FILE_SENTENCES_PATH), readFile(FILE_TITLES_PATH), readFile(FILE_CATEGORIES_PATH), readFile(FILE_COMMENTS_PATH)]);
 
     const [count] = args;
     const countOffer = Number.parseInt(count, 10) || DEFAULT_COUNT;
