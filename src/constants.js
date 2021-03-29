@@ -27,6 +27,11 @@ const HttpCode = {
   BAD_REQUEST: 400
 };
 
+const Env = {
+  DEVELOPMENT: `development`,
+  PRODUCTION: `production`
+};
+
 module.exports = {
   DEFAULT_COMMAND,
   USER_ARGV_INDEX,
@@ -35,5 +40,6 @@ module.exports = {
   HttpCode,
   MAX_ID_LENGTH,
   MAX_COMMENTS,
-  API_PREFIX
+  API_PREFIX,
+  Env
 };
