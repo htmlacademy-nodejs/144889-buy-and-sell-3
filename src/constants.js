@@ -4,12 +4,18 @@ const DEFAULT_COMMAND = `--help`;
 
 const USER_ARGV_INDEX = 2;
 
+const maxOffersGenerate = 1000;
+
+const MAX_ID_LENGTH = 6;
+
+const MAX_COMMENTS = 4;
+
+const API_PREFIX = `/api`;
+
 const ExitCode = {
   ERROR: 1,
   SUCCESS: 0,
 };
-
-const maxOffersGenerate = 1000;
 
 const HttpCode = {
   OK: 200,
@@ -20,12 +26,6 @@ const HttpCode = {
   UNAUTHORIZED: 401,
   BAD_REQUEST: 400
 };
-
-const MAX_ID_LENGTH = 6;
-
-const MAX_COMMENTS = 4;
-
-const API_PREFIX = `/api`;
 
 module.exports = {
   DEFAULT_COMMAND,
