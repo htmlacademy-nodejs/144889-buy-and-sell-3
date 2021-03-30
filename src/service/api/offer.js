@@ -8,9 +8,8 @@ const instanceValidator = require(`../middlewares/instanceValidator`);
 const offerKeys = [`category`, `description`, `picture`, `title`, `type`, `sum`];
 const commentKeys = [`text`];
 
-const route = new Router();
-
 module.exports = (app, offerService, commentService) => {
+  const route = new Router();
   app.use(`/offers`, route);
 
   // GET /api/offers
