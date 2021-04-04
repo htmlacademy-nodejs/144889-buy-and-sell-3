@@ -1,8 +1,8 @@
 'use strict';
 
+const api = require(`../api`).getApi();
 const {Router} = require(`express`);
 const mainRoutes = new Router();
-const api = require(`../api`).getApi();
 
 
 mainRoutes.get(`/`, async (req, res) => {

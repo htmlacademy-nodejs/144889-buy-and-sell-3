@@ -1,5 +1,6 @@
 'use strict';
 
+const api = require(`../api`).getApi();
 const {Router} = require(`express`);
 const multer = require(`multer`);
 const path = require(`path`);
@@ -9,7 +10,6 @@ const UPLOAD_DIR = `../upload/img/`;
 
 const uploadDirAbsolute = path.resolve(__dirname, UPLOAD_DIR);
 
-const api = require(`../api`).getApi();
 const offersRoutes = new Router();
 
 const storage = multer.diskStorage({
@@ -33,13 +33,16 @@ offersRoutes.get(`/add`, async (req, res) => {
 offersRoutes.post(`/add`, upload.single(`avatar`), async (req, res) => {
   const {body, file} = req;
   const offerData = {
-    picture: file.filename,
     sum: body.price,
     type: body.action,
     description: body.comment,
     title: body[`ticket-name`],
     category: Array.isArray(body.category) ? body.category : [body.category]
   };
+
+  if (file) {
+    offerData.picture = file.filename;
+  }
 
   try {
     await api.createOffer(offerData);
@@ -57,6 +60,33 @@ offersRoutes.get(`/edit/:id`, async (req, res) => {
   ]);
 
   res.render(`ticket-edit`, {offer, categories});
+});
+
+offersRoutes.post(`/edit/:id`, upload.single(`avatar`), async (req, res) => {
+  const {body, file} = req;
+  const {id} = req.params;
+  const offer = await api.getOffer(id);
+
+  const updatedOffer = {
+    sum: body.price,
+    type: body.action,
+    description: body.comment,
+    title: body[`ticket-name`],
+    category: Array.isArray(body.category) ? body.category : [body.category]
+  };
+  if (file) {
+    updatedOffer.picture = file.filename;
+  }
+
+  const offerData = Object.assign(offer, updatedOffer);
+
+  try {
+    await api.updateOffer(offerData, id);
+    res.redirect(`/my`);
+  } catch (error) {
+    console.error(error.message);
+    res.redirect(`back`);
+  }
 });
 
 offersRoutes.get(`/:id`, (req, res) => res.render(`ticket`));

@@ -5,7 +5,7 @@ block content
     .ticket-form__wrapper
       h1.ticket-form__title Редактировать публикацию
       .ticket-form__tile
-        form.ticket-form__form.form(action="#" method="post" enctype="multipart/form-data" autocomplete="off")
+        form.ticket-form__form.form(action=`/offers/edit/${offer.id}` method="post" enctype="multipart/form-data" autocomplete="off")
           .ticket-form__avatar-container.js-preview-container.uploaded
             .ticket-form__avatar.js-preview
               img(src=`/img/${offer.picture}` alt="")

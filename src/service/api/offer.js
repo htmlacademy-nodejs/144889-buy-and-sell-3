@@ -5,7 +5,7 @@ const {HttpCode} = require(`../../constants`);
 const offerExist = require(`../middlewares/offerExist`);
 const instanceValidator = require(`../middlewares/instanceValidator`);
 
-const offerKeys = [`category`, `description`, `picture`, `title`, `type`, `sum`];
+const offerKeys = [`category`, `description`, `title`, `type`, `sum`];
 const commentKeys = [`text`];
 
 module.exports = (app, offerService, commentService) => {
