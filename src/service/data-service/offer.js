@@ -1,45 +1,50 @@
 'use strict';
 
-const {nanoid} = require(`nanoid`);
-const {MAX_ID_LENGTH} = require(`../../constants`);
+const Aliase = require(`../models/aliase`);
 
 class OfferService {
-  constructor(offers) {
-    this._offers = offers;
+  constructor(sequelize) {
+    this._Offer = sequelize.models.Offer;
+    this._Comment = sequelize.models.Comment;
+    this._Category = sequelize.models.Category;
   }
 
-  create(offer) {
-    const newOffer = Object
-      .assign({id: nanoid(MAX_ID_LENGTH), comments: []}, offer);
-
-    this._offers.push(newOffer);
-    return newOffer;
+  async create(offerData) {
+    const offer = await this._Offer.create(offerData);
+    await offer.addCategories(offerData.categories);
+    return offer.get();
   }
 
-  drop(id) {
-    const offer = this._offers.find((item) => item.id === id);
+  async drop(id) {
+    const deletedOffer = await this._Offer.destroy({
+      where: {id}
+    });
+    return !!deletedOffer;
+  }
 
-    if (!offer) {
-      return null;
+  async findAll(needComments) {
+    const include = [Aliase.CATEGORIES];
+    if (needComments) {
+      include.push(Aliase.COMMENTS);
     }
+    const offers = await this._Offer.findAll({include});
+    return offers.map((item) => item.get());
+  }
 
-    this._offers = this._offers.filter((item) => item.id !== id);
+  async findOne(id, needComments) {
+    const include = [Aliase.CATEGORIES];
+    if (needComments) {
+      include.push(Aliase.COMMENTS);
+    }
+    const offer = await this._Offer.findByPk(id, {include});
     return offer;
   }
 
-  findAll() {
-    return this._offers;
-  }
-
-  findOne(id) {
-    return this._offers.find((item) => item.id === id);
-  }
-
-  update(id, offer) {
-    const oldOffer = this._offers
-      .find((item) => item.id === id);
-
-    return Object.assign(oldOffer, offer);
+  async update(id, offer) {
+    const [updatedOffer] = await this._Offer.update(offer, {
+      where: {id}
+    });
+    return !!updatedOffer;
   }
 
 }

@@ -9,6 +9,19 @@ head
 body
   mixin ticketLabel(type)
     span(class!=attributes.class || `ticket-card__label`) #{type === `OFFER` ? `Куплю` : `Продам`}
+  -
+    const getRandomInt = (max) => Math.ceil(Math.random()*max);
+  mixin categoryImage(category)
+    -
+      const idPadded = `0${getRandomInt(6)}`
+    img(src=`/img/cat${idPadded}.jpg` srcset=`/img/cat${idPadded}@2x.jpg 2x` alt=category.name)
+  mixin formattedDate(dateString)
+    -
+      const formatDate = (dateString) => {
+        const date = new Date(dateString);
+        return date.toLocaleString();
+      }
+    span #{formatDate(offer.createdAt)}
   include partials/header.pug
   main.page-content
     block content

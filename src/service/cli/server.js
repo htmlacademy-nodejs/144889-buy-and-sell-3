@@ -16,11 +16,12 @@ module.exports = {
     try {
       logger.info(`Trying to connect to database...`);
       await sequelize.authenticate();
-      logger.info(`The connection to database is established`);
     } catch (err) {
       logger.error(`An error occurred: ${err.message}`);
       process.exit(ExitCode.ERROR);
     }
+    logger.info(`The connection to database is established`);
+
     const [customPort] = args;
     const port = Number.parseInt(customPort, 10) || DEFAULT_PORT;
 

@@ -37,7 +37,7 @@ offersRoutes.post(`/add`, upload.single(`avatar`), async (req, res) => {
     type: body.action,
     description: body.comment,
     title: body[`ticket-name`],
-    category: Array.isArray(body.category) ? body.category : [body.category]
+    categories: Array.isArray(body.categories) ? body.categories : [body.categories]
   };
 
   if (file) {
@@ -45,7 +45,7 @@ offersRoutes.post(`/add`, upload.single(`avatar`), async (req, res) => {
   }
 
   try {
-    await api.createOffer(offerData);
+    api.createOffer(offerData);
     res.redirect(`/my`);
   } catch (error) {
     res.redirect(`back`);
@@ -72,7 +72,7 @@ offersRoutes.post(`/edit/:id`, upload.single(`avatar`), async (req, res) => {
     type: body.action,
     description: body.comment,
     title: body[`ticket-name`],
-    category: Array.isArray(body.category) ? body.category : [body.category]
+    categories: Array.isArray(body.categories) ? body.categories : [body.categories]
   };
   if (file) {
     updatedOffer.picture = file.filename;
@@ -89,6 +89,10 @@ offersRoutes.post(`/edit/:id`, upload.single(`avatar`), async (req, res) => {
   }
 });
 
-offersRoutes.get(`/:id`, (req, res) => res.render(`ticket`));
+offersRoutes.get(`/:id`, async (req, res) => {
+  const {id} = req.params;
+  const offer = await api.getOffer(id, true);
+  res.render(`ticket`, {offer});
+});
 
 module.exports = offersRoutes;

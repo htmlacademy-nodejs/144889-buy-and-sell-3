@@ -6,8 +6,6 @@ const USER_ARGV_INDEX = 2;
 
 const maxOffersGenerate = 1000;
 
-const MAX_ID_LENGTH = 6;
-
 const MAX_COMMENTS = 4;
 
 const API_PREFIX = `/api`;
@@ -38,7 +36,6 @@ module.exports = {
   ExitCode,
   maxOffersGenerate,
   HttpCode,
-  MAX_ID_LENGTH,
   MAX_COMMENTS,
   API_PREFIX,
   Env
