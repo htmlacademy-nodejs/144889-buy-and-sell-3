@@ -2,29 +2,39 @@
 
 const express = require(`express`);
 const request = require(`supertest`);
+const Sequelize = require(`sequelize`);
 
 const offer = require(`./offer`);
 const OfferService = require(`../data-service/offer`);
 const CommentService = require(`../data-service/comment`);
+const initDB = require(`../lib/init-db`);
 
 const {HttpCode} = require(`../../constants`);
 const mockData = require(`./_stubs/offer.json`);
+const mockCategories = [
+  `Животные`,
+  `Посуда`,
+  `Марки`,
+  `Разное`,
+  `Книги`
+];
 
-const createAPI = () => {
+const createAPI = async () => {
+  const mockDB = new Sequelize(`sqlite::memory:`, {logging: false});
+  await initDB(mockDB, {categories: mockCategories, offers: mockData});
   const app = express();
-  const cloneData = JSON.parse(JSON.stringify(mockData));
   app.use(express.json());
-  offer(app, new OfferService(cloneData), new CommentService());
+  offer(app, new OfferService(mockDB), new CommentService(mockDB));
   return app;
 };
 
 describe(`Offer API returns a list of all offers`, () => {
 
-  const app = createAPI();
-
   let response;
+  let app;
 
   beforeAll(async () => {
+    app = await createAPI();
     response = await request(app)
       .get(`/offers`);
   });
@@ -33,19 +43,19 @@ describe(`Offer API returns a list of all offers`, () => {
 
   test(`Returns a list of 5 offers`, () => expect(response.body.length).toBe(5));
 
-  test(`First offer's id equals "bUAlOA"`, () => expect(response.body[0].id).toBe(`bUAlOA`));
+  test(`First offer's title equals "Куплю антиквариат"`, () => expect(response.body[0].title).toBe(`Куплю антиквариат`));
 
 });
 
 describe(`Offer API returns an offer with given id`, () => {
 
-  const app = createAPI();
-
   let response;
+  let app;
 
   beforeAll(async () => {
+    app = await createAPI();
     response = await request(app)
-      .get(`/offers/bUAlOA`);
+      .get(`/offers/1`);
   });
 
   test(`Status code 200`, () => expect(response.statusCode).toBe(HttpCode.OK));
@@ -57,27 +67,24 @@ describe(`Offer API returns an offer with given id`, () => {
 describe(`Offer API creates an offer if data is valid`, () => {
 
   const newOffer = {
-    category: `Котики`,
+    categories: [1, 2],
     title: `Дам погладить котика`,
     description: `Дам погладить котика. Дорого. Не гербалайф`,
     picture: `cat.jpg`,
     type: `OFFER`,
     sum: 100500
   };
-  const app = createAPI();
+  let app;
   let response;
 
   beforeAll(async () => {
+    app = await createAPI();
     response = await request(app)
       .post(`/offers`)
       .send(newOffer);
   });
 
-
   test(`Status code 201`, () => expect(response.statusCode).toBe(HttpCode.CREATED));
-
-
-  test(`Returns offer created`, () => expect(response.body).toEqual(expect.objectContaining(newOffer)));
 
   test(`Offers count is changed`, () => request(app)
     .get(`/offers`)
@@ -96,7 +103,11 @@ describe(`Offer API refuses to create an offer if data is invalid`, () => {
     type: `OFFER`,
     sum: 100500
   };
-  const app = createAPI();
+  let app;
+
+  beforeAll(async () => {
+    app = await createAPI();
+  });
 
   test(`Without any required property response code is 400`, async () => {
     for (const key of Object.keys(newOffer)) {
@@ -114,40 +125,38 @@ describe(`Offer API refuses to create an offer if data is invalid`, () => {
 describe(`Offer API changes existent offer`, () => {
 
   const newOffer = {
-    category: `Котики`,
+    categories: [2],
     title: `Дам погладить котика`,
     description: `Дам погладить котика. Дорого. Не гербалайф`,
     picture: `cat.jpg`,
     type: `OFFER`,
     sum: 100500
   };
-  const app = createAPI();
-  let response;
+  let app; let response;
 
   beforeAll(async () => {
+    app = await createAPI();
     response = await request(app)
-      .put(`/offers/bUAlOA`)
+      .put(`/offers/2`)
       .send(newOffer);
   });
 
   test(`Status code 200`, () => expect(response.statusCode).toBe(HttpCode.OK));
 
-  test(`Returns changed offer`, () => expect(response.body).toEqual(expect.objectContaining(newOffer)));
-
   test(`Offer is really changed`, () => request(app)
-    .get(`/offers/bUAlOA`)
+    .get(`/offers/2`)
     .expect((res) => expect(res.body.title).toBe(`Дам погладить котика`))
   );
 
 });
 
-test(`Offer API returns status code 404 when trying to change non-existent offer`, () => {
+test(`Offer API returns status code 404 when trying to change non-existent offer`, async () => {
 
-  const app = createAPI();
+  const app = await createAPI();
 
   const validOffer = {
-    category: `Это`,
-    title: `валидный`,
+    categories: [3],
+    title: `Это валидный`,
     description: `объект`,
     picture: `объявления`,
     type: `однако`,
@@ -155,43 +164,40 @@ test(`Offer API returns status code 404 when trying to change non-existent offer
   };
 
   return request(app)
-    .put(`/offers/NOEXST`)
+    .put(`/offers/20`)
     .send(validOffer)
     .expect(HttpCode.NOT_FOUND);
 });
 
-test(`Offer API returns status code 400 when trying to change an offer with invalid data`, () => {
+test(`Offer API returns status code 400 when trying to change an offer with invalid data`, async () => {
 
-  const app = createAPI();
+  const app = await createAPI();
 
   const invalidOffer = {
-    category: `Это`,
-    title: `невалидный`,
+    categories: [1, 2],
+    title: `Это невалидный`,
     description: `объект`,
     picture: `объявления`,
     type: `нет поля sum`
   };
 
   return request(app)
-    .put(`/offers/NOEXST`)
+    .put(`/offers/20`)
     .send(invalidOffer)
     .expect(HttpCode.BAD_REQUEST);
 });
 
 describe(`Offer API correctly deletes an offer`, () => {
 
-  const app = createAPI();
-
-  let response;
+  let response; let app;
 
   beforeAll(async () => {
+    app = await createAPI();
     response = await request(app)
-      .delete(`/offers/ptkZyI`);
+      .delete(`/offers/1`);
   });
 
   test(`Status code 200`, () => expect(response.statusCode).toBe(HttpCode.OK));
-
-  test(`Returns deleted offer`, () => expect(response.body.id).toBe(`ptkZyI`));
 
   test(`Offer count is 4 now`, () => request(app)
     .get(`/offers`)
@@ -202,32 +208,32 @@ describe(`Offer API correctly deletes an offer`, () => {
 
 describe(`Offer API refuses to delete non-existent offer`, () => {
 
-  test(`Status code 404`, () => {
+  test(`Status code 404`, async () => {
 
-    const app = createAPI();
+    const app = await createAPI();
 
     return request(app)
-      .delete(`/offers/NOEXST`)
+      .delete(`/offers/20`)
       .expect(HttpCode.NOT_FOUND);
   });
 });
 
 describe(`Offer API returns a list of comments to given offer`, () => {
 
-  const app = createAPI();
-
   let response;
+  let app;
 
   beforeAll(async () => {
+    app = await createAPI();
     response = await request(app)
-      .get(`/offers/GxdTgz/comments`);
+      .get(`/offers/2/comments`);
   });
 
   test(`Status code 200`, () => expect(response.statusCode).toBe(HttpCode.OK));
 
-  test(`Returns list of 4 comments`, () => expect(response.body.length).toBe(4));
+  test(`Returns list of 3 comments`, () => expect(response.body.length).toBe(3));
 
-  test(`First comment's id is "kqME9j"`, () => expect(response.body[0].id).toBe(`kqME9j`));
+  test(`First comment's text is "Почему в таком ужасном состоянии?"`, () => expect(response.body[0].text).toBe(`Почему в таком ужасном состоянии?`));
 });
 
 describe(`Offer API creates a comment if data is valid`, () => {
@@ -236,34 +242,32 @@ describe(`Offer API creates a comment if data is valid`, () => {
     text: `текст валидного`
   };
 
-  const app = createAPI();
-
   let response;
+  let app;
 
   beforeAll(async () => {
+    app = await createAPI();
     response = await request(app)
-      .post(`/offers/GxdTgz/comments`)
+      .post(`/offers/3/comments`)
       .send(newValidComment);
   });
 
   test(`Status code 201`, () => expect(response.statusCode).toBe(HttpCode.CREATED));
 
-  test(`Returns created comment`, () => expect(response.body).toEqual(expect.objectContaining(newValidComment)));
-
   test(`Comments count is changed`, () => request(app)
-    .get(`/offers/GxdTgz/comments`)
+    .get(`/offers/3/comments`)
     .expect((res) => expect(res.body.length).toBe(5))
   );
 });
 
 describe(`Offer API refuses to create a comment to non-existent offer`, () => {
 
-  test(`Status code 404`, () => {
+  test(`Status code 404`, async () => {
 
-    const app = createAPI();
+    const app = await createAPI();
 
     return request(app)
-      .post(`/offers/NOEXST/comments`)
+      .post(`/offers/20/comments`)
       .send({
         text: `Неважно`
       })
@@ -273,12 +277,12 @@ describe(`Offer API refuses to create a comment to non-existent offer`, () => {
 
 describe(`Offer API refuses to create a comment when data is invalid`, () => {
 
-  test(`Status code 400`, () => {
+  test(`Status code 400`, async () => {
 
-    const app = createAPI();
+    const app = await createAPI();
 
     return request(app)
-      .post(`/offers/lP5Raq/comments`)
+      .post(`/offers/2/comments`)
       .send({
         comment: `Невалидное поле комментария`
       })
@@ -288,45 +292,42 @@ describe(`Offer API refuses to create a comment when data is invalid`, () => {
 
 describe(`Offer API correctly deletes a comment`, () => {
 
-  const app = createAPI();
-
-  let response;
+  let response; let app;
 
   beforeAll(async () => {
+    app = await createAPI();
     response = await request(app)
-      .delete(`/offers/lP5Raq/comments/W-zdkL`);
+      .delete(`/offers/1/comments/1`);
   });
 
   test(`Status code 200`, () => expect(response.statusCode).toBe(HttpCode.OK));
 
-  test(`Returns deleted comment`, () => expect(response.body.id).toBe(`W-zdkL`));
-
   test(`Comment count is 2 now`, () => request(app)
-    .get(`/offers/lP5Raq/comments`)
-    .expect((res) => expect(res.body.length).toBe(0))
+    .get(`/offers/1/comments`)
+    .expect((res) => expect(res.body.length).toBe(3))
   );
 });
 
 describe(`Offer API refuses to delete non-existent comment`, () => {
 
-  test(`Status code 404`, () => {
+  test(`Status code 404`, async () => {
 
-    const app = createAPI();
+    const app = await createAPI();
 
     return request(app)
-      .delete(`/offers/GxdTgz/comments/NOEXST`)
+      .delete(`/offers/1/comments/20`)
       .expect(HttpCode.NOT_FOUND);
   });
 });
 
 describe(`Offer API refuses to delete a comment to non-existent offer`, () => {
 
-  test(`Status code 404`, () => {
+  test(`Status code 404`, async () => {
 
-    const app = createAPI();
+    const app = await createAPI();
 
     return request(app)
-      .delete(`/offers/NOEXST/comments/k3H8Jj`)
+      .delete(`/offers/100/comments/1`)
       .expect(HttpCode.NOT_FOUND);
   });
 });

@@ -6,8 +6,14 @@ const mainRoutes = new Router();
 
 
 mainRoutes.get(`/`, async (req, res) => {
-  const offers = await api.getOffers();
-  res.render(`index`, {offers});
+  const [
+    offers,
+    categories
+  ] = await Promise.all([
+    api.getOffers({comments: true}),
+    api.getCategories(true)
+  ]);
+  res.render(`index`, {offers, categories});
 });
 mainRoutes.get(`/register`, (req, res) => res.render(`sign-up`));
 mainRoutes.get(`/login`, (req, res) => res.render(`login`));
