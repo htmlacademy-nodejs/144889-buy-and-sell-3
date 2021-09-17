@@ -40,6 +40,23 @@ class OfferService {
     return offer;
   }
 
+  async findPage({offset, limit, comments}) {
+    const include = [Aliase.CATEGORIES];
+    if (comments) {
+      include.push(Aliase.COMMENTS);
+    }
+    const {count, rows} = await this._Offer.findAndCountAll({
+      limit,
+      offset,
+      include,
+      order: [
+        [`createdAt`, `DESC`]
+      ],
+      distinct: true
+    });
+    return {count, offers: rows};
+  }
+
   async update(id, offer) {
     const [updatedOffer] = await this._Offer.update(offer, {
       where: {id}
