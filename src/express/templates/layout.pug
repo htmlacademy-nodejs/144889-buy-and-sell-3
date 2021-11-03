@@ -10,6 +10,13 @@ head
     a.active{
       pointer-events: none;
     }
+    .server-error{
+      border-radius: 10px;
+      color: white;
+      background-color: tomato;
+      margin: 20px 0;
+      padding: 10px;
+    }
 body
   mixin ticketLabel(type)
     span(class!=attributes.class || `ticket-card__label`) #{type === `OFFER` ? `Куплю` : `Продам`}
@@ -57,6 +64,11 @@ body
         if end < totalPages
           li
             a(href=`${prefix}page=${page + 1}`) Вперёд
+  mixin insertErrorMessages(messages)
+    if messages
+      each message of messages
+        .server-error= message
+
   include partials/header.pug
   main.page-content
     block content

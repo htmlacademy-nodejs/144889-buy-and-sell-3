@@ -1,12 +1,9 @@
 'use strict';
 
 const {Router} = require(`express`);
-const {HttpCode} = require(`../../constants`);
+const {HttpCode, instances} = require(`../../constants`);
 const offerExist = require(`../middlewares/offerExist`);
 const instanceValidator = require(`../middlewares/instanceValidator`);
-
-const offerKeys = [`categories`, `description`, `title`, `type`, `sum`];
-const commentKeys = [`text`];
 
 module.exports = (app, offerService, commentService) => {
   const route = new Router();
@@ -40,14 +37,15 @@ module.exports = (app, offerService, commentService) => {
   });
 
   // POST /api/offers
-  route.post(`/`, instanceValidator(offerKeys), async (req, res) => {
+  route.post(`/`, instanceValidator(instances.OFFER), async (req, res) => {
     const offer = await offerService.create(req.body);
+    console.log(`offer`, offer);
     return res.status(HttpCode.CREATED)
       .json(offer);
   });
 
   // PUT /api/offers/:offerId
-  route.put(`/:offerId`, instanceValidator(offerKeys), async (req, res) => {
+  route.put(`/:offerId`, instanceValidator(instances.OFFER), async (req, res) => {
     const {offerId} = req.params;
     const updatedOffer = await offerService.update(offerId, req.body);
 
@@ -94,7 +92,7 @@ module.exports = (app, offerService, commentService) => {
   });
 
   // POST /api/offers/:offerId/comments
-  route.post(`/:offerId/comments`, [offerExist(offerService), instanceValidator(commentKeys)], async (req, res) => {
+  route.post(`/:offerId/comments`, [offerExist(offerService), instanceValidator(instances.COMMENT)], async (req, res) => {
     const {offerId} = req.params;
 
     const createdComment = await commentService.create(offerId, req.body);

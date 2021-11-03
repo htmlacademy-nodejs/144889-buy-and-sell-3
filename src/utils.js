@@ -14,3 +14,7 @@ module.exports.shuffle = (someArray) => {
 
   return someArray;
 };
+
+module.exports.prepareErrors = (errors) => {
+  return errors.response.data.split(`\n`);
+};

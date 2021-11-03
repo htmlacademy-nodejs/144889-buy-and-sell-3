@@ -69,7 +69,7 @@ describe(`Offer API creates an offer if data is valid`, () => {
   const newOffer = {
     categories: [1, 2],
     title: `Дам погладить котика`,
-    description: `Дам погладить котика. Дорого. Не гербалайф`,
+    description: `Дам погладить котика. Дорого. Не гербалайф. Привит Пфайзером!`,
     picture: `cat.jpg`,
     type: `OFFER`,
     sum: 100500
@@ -98,7 +98,7 @@ describe(`Offer API refuses to create an offer if data is invalid`, () => {
   const newOffer = {
     category: `Котики`,
     title: `Дам погладить котика`,
-    description: `Дам погладить котика. Дорого. Не гербалайф`,
+    description: `Дам погладить котика. Дорого. Не гербалайф. Привит Пфайзером!`,
     picture: `cat.jpg`,
     type: `OFFER`,
     sum: 100500
@@ -120,6 +120,34 @@ describe(`Offer API refuses to create an offer if data is invalid`, () => {
     }
   });
 
+  test(`When field type is wrong response code is 400`, async () => {
+    const badOffers = [
+      {...newOffer, sum: true},
+      {...newOffer, picture: 12345},
+      {...newOffer, categories: `Котики`}
+    ];
+    for (const badOffer of badOffers) {
+      await request(app)
+        .post(`/offers`)
+        .send(badOffer)
+        .expect(HttpCode.BAD_REQUEST);
+    }
+  });
+
+  test(`When field value is wrong response code is 400`, async () => {
+    const badOffers = [
+      {...newOffer, sum: -1},
+      {...newOffer, title: `too short`},
+      {...newOffer, categories: []}
+    ];
+    for (const badOffer of badOffers) {
+      await request(app)
+        .post(`/offers`)
+        .send(badOffer)
+        .expect(HttpCode.BAD_REQUEST);
+    }
+  });
+
 });
 
 describe(`Offer API changes existent offer`, () => {
@@ -127,7 +155,7 @@ describe(`Offer API changes existent offer`, () => {
   const newOffer = {
     categories: [2],
     title: `Дам погладить котика`,
-    description: `Дам погладить котика. Дорого. Не гербалайф`,
+    description: `Дам погладить котика. Дорого. Не гербалайф. Привит Пфайзером!`,
     picture: `cat.jpg`,
     type: `OFFER`,
     sum: 100500
@@ -156,11 +184,11 @@ test(`Offer API returns status code 404 when trying to change non-existent offer
 
   const validOffer = {
     categories: [3],
-    title: `Это валидный`,
-    description: `объект`,
-    picture: `объявления`,
-    type: `однако`,
-    sum: 404
+    title: `Это вполне валидный`,
+    description: `объект объявления, однако поскольку такого объявления в базе нет`,
+    picture: `мы получим 404`,
+    type: `SALE`,
+    sum: 404,
   };
 
   return request(app)
@@ -239,7 +267,7 @@ describe(`Offer API returns a list of comments to given offer`, () => {
 describe(`Offer API creates a comment if data is valid`, () => {
 
   const newValidComment = {
-    text: `текст валидного`
+    text: `текст валидного комментария`
   };
 
   let response;
@@ -284,7 +312,7 @@ describe(`Offer API refuses to create a comment when data is invalid`, () => {
     return request(app)
       .post(`/offers/2/comments`)
       .send({
-        comment: `Невалидное поле комментария`
+        text: `Невалидное поле`
       })
       .expect(HttpCode.BAD_REQUEST);
   });

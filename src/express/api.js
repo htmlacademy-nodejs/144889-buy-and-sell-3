@@ -2,6 +2,7 @@
 
 const axios = require(`axios`);
 
+const {HttpMethod} = require(`../constants`);
 const TIMEOUT = 1000;
 const port = process.env.API_PORT || 3000;
 const defaultUrl = `http://localhost:${port}/api/`;
@@ -38,14 +39,21 @@ class API {
 
   createOffer(data) {
     return this._load(`/offers`, {
-      method: `POST`,
+      method: HttpMethod.POST,
       data
     });
   }
 
   async updateOffer(data, id) {
     return this._load(`/offers/${id}`, {
-      method: `PUT`,
+      method: HttpMethod.PUT,
+      data
+    });
+  }
+
+  createComment(id, data) {
+    return this._load(`/offers/${id}/comments`, {
+      method: HttpMethod.POST,
       data
     });
   }
